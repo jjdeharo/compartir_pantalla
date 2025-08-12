@@ -1,0 +1,18 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0,0,0,.05);
+    border-radius: .5rem;
+}
+
+video {
+    max-width: 100%;
+    height: auto;
+    background-color: #000;
+}
+
+#local-video, #remote-video {
+    min-height: 200px; /* Ensure video elements have some height even if no stream */
+}
