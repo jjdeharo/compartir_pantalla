@@ -79,8 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('Error al obtener la pantalla:', error);
+            let errorMessage = 'No se puede transmitir sin el permiso para compartir pantalla.';
+            if (error.name === 'NotAllowedError') {
+                errorMessage = 'Permiso denegado por el usuario. Por favor, acepta el diálogo de compartición de pantalla.';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage = 'No se encontró ninguna pantalla o ventana para compartir.';
+            } else if (error.name === 'AbortError') {
+                errorMessage = 'La compartición de pantalla fue cancelada.';
+            } else {
+                errorMessage += ` (${error.name}: ${error.message})`;
+            }
             statusHeading.textContent = 'Permiso Denegado';
-            statusText.textContent = 'No se puede transmitir sin el permiso para compartir pantalla.';
+            statusText.textContent = errorMessage;
             spinner.style.display = 'none';
             startSharingBtn.style.display = 'block'; // Mostrar botón de nuevo
         }
