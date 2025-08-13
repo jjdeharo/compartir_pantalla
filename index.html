@@ -25,6 +25,19 @@
             background: white;
             border-radius: 10px;
             margin-bottom: 20px;
+            display: inline-block; /* <-- AÑADIDO PARA CENTRAR */
+        }
+        .status-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none; /* Oculto por defecto */
+            z-index: 100;
         }
         #url-display {
             font-family: monospace;

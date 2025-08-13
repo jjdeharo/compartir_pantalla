@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const qrContainer = document.getElementById('qr-container');
     const urlDisplay = document.getElementById('url-display');
     const remoteVideo = document.getElementById('remote-video');
+    const statusMessage = document.getElementById('status-message'); // <-- Elemento para notificaciones
 
     // Misma configuración de servidores para máxima compatibilidad
     const iceServers = [
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Cuando el receptor se conecta al servidor de intermediación
     peer.on('open', (peerId) => {
         console.log('Receptor listo con ID:', peerId);
+        statusMessage.style.display = 'none'; // Ocultar mensaje de estado al conectar
 
         // Construir la URL para el emisor
         const url = new URL('emisor.html', window.location.href);
@@ -71,17 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         call.on('error', (err) => {
             console.error('Error en la llamada:', err);
-            alert('Ocurrió un error durante la llamada.');
+            statusMessage.textContent = 'Ocurrió un error durante la llamada.';
+            statusMessage.style.display = 'block';
         });
     });
 
     peer.on('error', (err) => {
         console.error('Error en PeerJS:', err);
-        alert('No se pudo conectar con el servicio de intermediación. Recarga la página para intentarlo de nuevo.');
+        statusMessage.textContent = `Error de conexión: ${err.message}. Intentando reconectar...`;
+        statusMessage.style.display = 'block';
     });
 
     peer.on('disconnected', () => {
         console.log('Desconectado del servidor PeerJS. Intentando reconectar...');
+        statusMessage.textContent = 'Conexión perdida. Intentando reconectar...';
+        statusMessage.style.display = 'block';
         peer.reconnect();
     });
 });
