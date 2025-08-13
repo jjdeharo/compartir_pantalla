@@ -1,0 +1,79 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const statusHeading = document.getElementById('status-heading');
+    const statusText = document.getElementById('status-text');
+    const localVideo = document.getElementById('local-video');
+    const spinner = document.getElementById('spinner');
+
+    // Misma configuración de servidores que en el script original para asegurar la conexión
+    const iceServers = [
+        { urls: 'stun:stun.metered.ca:80' },
+        { urls: 'turn:turn.metered.ca:80?transport=udp', username: '9745e21b303bdaea589c29bc', credential: 'UgG56tBqCEGNjzLY' },
+        { urls: 'turn:turn.metered.ca:443?transport=tcp', username: '9745e21b303bdaea589c29bc', credential: 'UgG56tBqCEGNjzLY' }
+    ];
+
+    // Obtener el ID del receptor de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const receiverId = urlParams.get('id');
+
+    if (!receiverId) {
+        statusHeading.textContent = 'Error';
+        statusText.textContent = 'No se ha proporcionado un ID de receptor en la URL.';
+        spinner.style.display = 'none';
+        return;
+    }
+
+    // Inicializar PeerJS
+    const peer = new Peer({
+        config: {
+            iceServers: iceServers,
+            iceTransportPolicy: 'all'
+        }
+    });
+
+    peer.on('open', async (id) => {
+        console.log('Conectado al servidor PeerJS con ID:', id);
+        statusText.textContent = 'Conceda permiso para compartir pantalla para continuar.';
+
+        try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            localVideo.srcObject = stream;
+
+            statusHeading.textContent = 'Conectando...';
+            statusText.textContent = 'Estableciendo conexión con el proyector.';
+
+            const call = peer.call(receiverId, stream);
+
+            call.on('stream', () => { // Esto es más para confirmación, el stream importante es el remoto
+                statusHeading.textContent = '¡Conectado y Transmitiendo!';
+                statusText.textContent = 'Puedes volver a esta ventana para detener la transmisión.';
+                spinner.style.display = 'none';
+            });
+
+            call.on('close', () => {
+                statusHeading.textContent = 'Desconectado';
+                statusText.textContent = 'La transmisión ha finalizado.';
+                stream.getTracks().forEach(track => track.stop());
+            });
+
+            call.on('error', (err) => {
+                console.error('Error en la llamada:', err);
+                statusHeading.textContent = 'Error de Conexión';
+                statusText.textContent = `No se pudo conectar. Asegúrate de que el código QR es correcto. Error: ${err.message}`;
+                spinner.style.display = 'none';
+            });
+
+        } catch (error) {
+            console.error('Error al obtener la pantalla:', error);
+            statusHeading.textContent = 'Permiso Denegado';
+            statusText.textContent = 'No se puede transmitir sin el permiso para compartir pantalla.';
+            spinner.style.display = 'none';
+        }
+    });
+
+    peer.on('error', (err) => {
+        console.error('Error en PeerJS:', err);
+        statusHeading.textContent = 'Error de PeerJS';
+        statusText.textContent = 'No se pudo conectar al servicio de intermediación.';
+        spinner.style.display = 'none';
+    });
+});
