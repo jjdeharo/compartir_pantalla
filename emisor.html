@@ -18,9 +18,10 @@
 </head>
 <body>
     <div class="container">
-        <h1 id="status-heading">Iniciando...</h1>
-        <p id="status-text">Por favor, concede permiso para compartir tu pantalla.</p>
-        <div class="spinner-border text-primary" role="status" id="spinner">
+        <h1 id="status-heading">Listo para Compartir</h1>
+        <p id="status-text">Haz clic en el botón para iniciar la compartición de tu pantalla.</p>
+        <button id="start-sharing-btn" class="btn btn-primary">Iniciar Compartición de Pantalla</button>
+        <div class="spinner-border text-primary mt-4" role="status" id="spinner" style="display: none;">
             <span class="visually-hidden">Loading...</span>
         </div>
         <!-- El video local es útil para que el usuario vea qué está compartiendo, pero lo ocultamos para no saturar la UI -->

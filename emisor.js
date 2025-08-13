@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusText = document.getElementById('status-text');
     const localVideo = document.getElementById('local-video');
     const spinner = document.getElementById('spinner');
+    const startSharingBtn = document.getElementById('start-sharing-btn'); // Nuevo botón
 
     // Misma configuración de servidores que en el script original para asegurar la conexión
     const iceServers = [
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statusHeading.textContent = 'Error';
         statusText.textContent = 'No se ha proporcionado un ID de receptor en la URL.';
         spinner.style.display = 'none';
+        startSharingBtn.style.display = 'none';
         return;
     }
 
@@ -32,7 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     peer.on('open', async (id) => {
         console.log('Conectado al servidor PeerJS con ID:', id);
-        statusText.textContent = 'Conceda permiso para compartir pantalla para continuar.';
+        // Ahora esperamos el clic del usuario para iniciar la compartición
+        startSharingBtn.style.display = 'block'; // Mostrar el botón
+        statusHeading.textContent = 'Listo para Compartir';
+        statusText.textContent = 'Haz clic en el botón para iniciar la compartición de tu pantalla.';
+    });
+
+    // Función para iniciar la compartición de pantalla
+    startSharingBtn.addEventListener('click', async () => {
+        startSharingBtn.style.display = 'none'; // Ocultar el botón
+        spinner.style.display = 'block'; // Mostrar spinner
+        statusHeading.textContent = 'Conectando...';
+        statusText.textContent = 'Por favor, concede permiso para compartir pantalla.';
 
         try {
             const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
@@ -53,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusHeading.textContent = 'Desconectado';
                 statusText.textContent = 'La transmisión ha finalizado.';
                 stream.getTracks().forEach(track => track.stop());
+                startSharingBtn.style.display = 'block'; // Mostrar botón de nuevo
             });
 
             call.on('error', (err) => {
@@ -60,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusHeading.textContent = 'Error de Conexión';
                 statusText.textContent = `No se pudo conectar. Asegúrate de que el código QR es correcto. Error: ${err.message}`;
                 spinner.style.display = 'none';
+                startSharingBtn.style.display = 'block'; // Mostrar botón de nuevo
             });
 
         } catch (error) {
@@ -67,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusHeading.textContent = 'Permiso Denegado';
             statusText.textContent = 'No se puede transmitir sin el permiso para compartir pantalla.';
             spinner.style.display = 'none';
+            startSharingBtn.style.display = 'block'; // Mostrar botón de nuevo
         }
     });
 
@@ -75,5 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
         statusHeading.textContent = 'Error de PeerJS';
         statusText.textContent = 'No se pudo conectar al servicio de intermediación.';
         spinner.style.display = 'none';
+        startSharingBtn.style.display = 'block'; // Mostrar botón de nuevo
     });
 });
