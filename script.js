@@ -61,6 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
         call.on('stream', (remoteStream) => {
             console.log('Stream de vídeo recibido.');
             remoteVideo.srcObject = remoteStream;
+            remoteVideo.muted = true; // evita bloqueo en móvil
+            remoteVideo.play().catch(() => {
+                statusMessage.textContent = 'Toca la pantalla para empezar a reproducir.';
+                statusMessage.style.display = 'block';
+            });
         });
 
         // 4. Cuando la llamada termina

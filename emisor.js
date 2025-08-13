@@ -12,6 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
         { urls: 'turn:turn.metered.ca:443?transport=tcp', username: '9745e21b303bdaea589c29bc', credential: 'UgG56tBqCEGNjzLY' }
     ];
 
+    // --- Verificación de origen seguro --- (Recomendación 1)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        statusHeading.textContent = 'Origen no seguro';
+        statusText.textContent =
+            'Abre esta página en HTTPS (o localhost) para poder compartir pantalla.';
+        spinner.style.display = 'none';
+        startSharingBtn.style.display = 'none';
+        return;
+    }
+
+    // --- Verificación de soporte de getDisplayMedia --- (Recomendación 2)
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        statusHeading.textContent = 'No compatible';
+        statusText.textContent = 'Este navegador no permite compartir pantalla.';
+        spinner.style.display = 'none';
+        startSharingBtn.style.display = 'none';
+        return;
+    }
+
     // Obtener el ID del receptor de la URL
     const urlParams = new URLSearchParams(window.location.search);
     const receiverId = urlParams.get('id');
@@ -48,7 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
         statusText.textContent = 'Por favor, concede permiso para compartir pantalla.';
 
         try {
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: { preferCurrentTab: true },
+                audio: isAndroid ? false : { echoCancellation: true } // Recomendación 3
+            });
             localVideo.srcObject = stream;
 
             statusHeading.textContent = 'Conectando...';
